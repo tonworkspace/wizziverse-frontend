@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface Feature {
   id: string;
@@ -31,6 +31,8 @@ function App() {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [particleCount, setParticleCount] = useState(20);
 
   const fullText = "WIZZIVERSE: The Future of Spiritual Technology";
 
@@ -128,8 +130,23 @@ function App() {
     return () => clearInterval(timer);
   }, []);
 
-  // Mouse tracking for interactive background
+  // Set particle count based on screen size
   useEffect(() => {
+    const updateParticleCount = () => {
+      const isMobile = window.innerWidth <= 768;
+      setParticleCount(isMobile ? 8 : 20);
+    };
+
+    updateParticleCount();
+    window.addEventListener('resize', updateParticleCount);
+    return () => window.removeEventListener('resize', updateParticleCount);
+  }, []);
+
+  // Mouse tracking for interactive background (disabled on mobile for performance)
+  useEffect(() => {
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) return;
+
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
     };
@@ -182,14 +199,14 @@ function App() {
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden relative">
       
-      {/* Animated Background */}
+      {/* Optimized Background - Reduced on mobile for performance */}
       <div className="fixed inset-0 z-0">
         {/* Base gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/10 to-black"></div>
         
-        {/* Dynamic gradient following mouse */}
+        {/* Dynamic gradient following mouse - Desktop only */}
         <div 
-          className="absolute w-96 h-96 rounded-full opacity-20 blur-3xl transition-all duration-1000 ease-out"
+          className="hidden md:block absolute w-96 h-96 rounded-full opacity-20 blur-3xl transition-all duration-1000 ease-out"
           style={{
             background: `radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, rgba(6, 182, 212, 0.2) 60%, transparent 100%)`,
             left: mousePosition.x - 192,
@@ -198,9 +215,9 @@ function App() {
           }}
         />
         
-        {/* Floating elements */}
+        {/* Reduced floating elements on mobile */}
         <div className="absolute inset-0">
-          {[...Array(20)].map((_, i) => (
+          {[...Array(particleCount)].map((_, i) => (
             <div
               key={i}
               className="absolute animate-pulse"
@@ -211,69 +228,112 @@ function App() {
                 animationDuration: `${3 + Math.random() * 4}s`
               }}
             >
-              <div className="w-2 h-2 bg-purple-500/30 rounded-full blur-sm"></div>
+              <div className="w-1 h-1 md:w-2 md:h-2 bg-purple-500/30 rounded-full blur-sm"></div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Header */}
-      <header className="relative z-20 p-6">
+      {/* Mobile-Friendly Header */}
+      <header className="relative z-20 p-4 md:p-6">
         <div className="container mx-auto flex justify-between items-center">
-          <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+          <div className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
             WIZZIVERSE
           </div>
-          <div className="flex space-x-4">
+          
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex space-x-4">
             <button 
               onClick={() => setShowEarlyAccess(true)}
-              className="bg-gradient-to-r from-purple-600 to-cyan-600 px-6 py-2 rounded-full font-semibold hover:scale-105 transition-transform"
+              className="bg-gradient-to-r from-purple-600 to-cyan-600 px-6 py-2 rounded-full font-semibold hover:scale-105 transition-transform text-sm md:text-base"
             >
               Join Waitlist
             </button>
           </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 rounded-lg bg-purple-600/20 border border-purple-500/30 text-white"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {isMobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden mt-4 bg-black/90 backdrop-blur-lg border border-purple-500/30 rounded-2xl p-4">
+            <button 
+              onClick={() => {
+                setShowEarlyAccess(true);
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 px-6 py-3 rounded-full font-semibold text-white mb-3 touch-manipulation"
+            >
+              Join Waitlist
+            </button>
+            <a 
+              href="https://whatsapp.com/channel/wizziverse" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="w-full block text-center border border-purple-500/50 px-6 py-3 rounded-full font-semibold text-white touch-manipulation"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              💬 Join Community
+            </a>
+          </div>
+        )}
       </header>
 
-      {/* Hero Section */}
-      <section className="relative z-10 min-h-screen flex items-center justify-center px-6">
+      {/* Mobile-Optimized Hero Section */}
+      <section className="relative z-10 min-h-screen flex items-center justify-center px-4 md:px-6">
         <div className="text-center max-w-4xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+          <div className="mb-8 md:mb-12">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 md:mb-6 leading-tight">
               <span className="bg-gradient-to-r from-purple-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent">
                 {typedText}
               </span>
               {isTyping && <span className="animate-pulse">|</span>}
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 mb-6 md:mb-8 max-w-3xl mx-auto leading-relaxed px-2">
               Where ancient wisdom meets cutting-edge technology. Join the revolution of conscious creators, 
               spiritual entrepreneurs, and sacred commerce.
             </p>
           </div>
 
-          {/* Launch Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12 max-w-2xl mx-auto">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-cyan-400 mb-2">{launchStats.waitlistMembers}</div>
-              <div className="text-sm text-gray-400">Waitlist Members</div>
+          {/* Mobile-Optimized Launch Stats */}
+          {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-8 md:mb-12 max-w-2xl mx-auto px-2">
+            <div className="text-center bg-black/20 backdrop-blur-sm rounded-xl p-3 md:p-4 border border-purple-500/20">
+              <div className="text-xl md:text-3xl font-bold text-cyan-400 mb-1 md:mb-2">{launchStats.waitlistMembers}</div>
+              <div className="text-xs md:text-sm text-gray-400">Waitlist Members</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-400 mb-2">{launchStats.betaUsers}</div>
-              <div className="text-sm text-gray-400">Beta Users</div>
+            <div className="text-center bg-black/20 backdrop-blur-sm rounded-xl p-3 md:p-4 border border-purple-500/20">
+              <div className="text-xl md:text-3xl font-bold text-green-400 mb-1 md:mb-2">{launchStats.betaUsers}</div>
+              <div className="text-xs md:text-sm text-gray-400">Beta Users</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-purple-400 mb-2">{launchStats.foundingCreators}</div>
-              <div className="text-sm text-gray-400">Founding Creators</div>
+            <div className="text-center bg-black/20 backdrop-blur-sm rounded-xl p-3 md:p-4 border border-purple-500/20">
+              <div className="text-xl md:text-3xl font-bold text-purple-400 mb-1 md:mb-2">{launchStats.foundingCreators}</div>
+              <div className="text-xs md:text-sm text-gray-400">Founding Creators</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-yellow-400 mb-2">{launchStats.launchDate}</div>
-              <div className="text-sm text-gray-400">Launch Date</div>
+            <div className="text-center bg-black/20 backdrop-blur-sm rounded-xl p-3 md:p-4 border border-purple-500/20">
+              <div className="text-xl md:text-3xl font-bold text-yellow-400 mb-1 md:mb-2">{launchStats.launchDate}</div>
+              <div className="text-xs md:text-sm text-gray-400">Launch Date</div>
             </div>
-          </div>
+          </div> */}
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          {/* Mobile-Friendly Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center items-center px-4">
             <button 
               onClick={() => setShowEarlyAccess(true)}
-              className="bg-gradient-to-r from-purple-600 to-cyan-600 px-8 py-4 rounded-full text-lg font-semibold hover:scale-105 transition-transform shadow-lg shadow-purple-500/25"
+              className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-cyan-600 px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-semibold hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-purple-500/25 touch-manipulation min-h-[48px]"
             >
               🚀 Get Early Access
             </button>
@@ -281,7 +341,7 @@ function App() {
               href="https://whatsapp.com/channel/wizziverse" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="border border-purple-500/50 px-8 py-4 rounded-full text-lg font-semibold hover:bg-purple-900/20 transition-colors"
+              className="w-full sm:w-auto border border-purple-500/50 px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-semibold hover:bg-purple-900/20 active:bg-purple-900/40 transition-colors touch-manipulation min-h-[48px] flex items-center justify-center"
             >
               💬 Join Community
             </a>
@@ -289,103 +349,103 @@ function App() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="relative z-10 py-20 px-6">
+      {/* Mobile-Optimized Features Section */}
+      <section className="relative z-10 py-12 md:py-20 px-4 md:px-6">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6">
               <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
                 Platform Features
               </span>
             </h2>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto px-2">
               Discover the tools that will transform how you share, learn, and monetize your spiritual gifts.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {features.map((feature, index) => (
               <div
                 key={feature.id}
-                className="bg-black/40 backdrop-blur-lg rounded-2xl p-8 border border-purple-500/20 hover:border-cyan-500/30 transition-all duration-300 hover:transform hover:scale-105 group"
+                className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 md:p-8 border border-purple-500/20 hover:border-cyan-500/30 transition-all duration-300 hover:transform hover:scale-105 active:scale-95 group touch-manipulation"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <div className="text-center mb-6">
-                  <div className="text-6xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                <div className="text-center mb-4 md:mb-6">
+                  <div className="text-4xl md:text-6xl mb-3 md:mb-4 group-hover:scale-110 transition-transform duration-300">
                     {feature.icon}
                   </div>
-                  <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getStatusBadge(feature.status)}`}>
+                  <span className={`inline-block px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium ${getStatusBadge(feature.status)}`}>
                     {getStatusText(feature.status)}
                   </span>
                 </div>
                 
-                <h3 className="text-xl font-bold text-white mb-4 text-center">{feature.title}</h3>
-                <p className="text-gray-300 text-center leading-relaxed">{feature.description}</p>
+                <h3 className="text-lg md:text-xl font-bold text-white mb-3 md:mb-4 text-center">{feature.title}</h3>
+                <p className="text-sm md:text-base text-gray-300 text-center leading-relaxed">{feature.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="relative z-10 py-20 px-6">
+      {/* Mobile-Optimized Testimonials Section */}
+      <section className="relative z-10 py-12 md:py-20 px-4 md:px-6">
         <div className="container mx-auto max-w-4xl">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-6">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">
               <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
                 What Our Community Says
               </span>
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             {testimonials.map((testimonial, index) => (
               <div
                 key={index}
-                className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-purple-500/20 hover:border-cyan-500/30 transition-all duration-300"
+                className="bg-black/40 backdrop-blur-lg rounded-2xl p-4 md:p-6 border border-purple-500/20 hover:border-cyan-500/30 transition-all duration-300"
               >
-                <div className="flex items-center mb-4">
-                  <div className="text-3xl mr-4">{testimonial.avatar}</div>
+                <div className="flex items-center mb-3 md:mb-4">
+                  <div className="text-2xl md:text-3xl mr-3 md:mr-4">{testimonial.avatar}</div>
                   <div>
-                    <h4 className="font-bold text-white">{testimonial.name}</h4>
-                    <p className="text-sm text-gray-400">{testimonial.role}</p>
+                    <h4 className="font-bold text-white text-sm md:text-base">{testimonial.name}</h4>
+                    <p className="text-xs md:text-sm text-gray-400">{testimonial.role}</p>
                   </div>
                 </div>
-                <div className="flex mb-4">
+                <div className="flex mb-3 md:mb-4">
                   {[...Array(5)].map((_, i) => (
-                    <span key={i} className="text-yellow-400">⭐</span>
+                    <span key={i} className="text-yellow-400 text-sm">⭐</span>
                   ))}
                 </div>
-                <p className="text-gray-300 leading-relaxed">{testimonial.content}</p>
+                <p className="text-sm md:text-base text-gray-300 leading-relaxed">{testimonial.content}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Call to Action */}
-      <section className="relative z-10 py-20 px-6">
+      {/* Mobile-Optimized Call to Action */}
+      <section className="relative z-10 py-12 md:py-20 px-4 md:px-6">
         <div className="container mx-auto max-w-4xl text-center">
-          <div className="bg-gradient-to-r from-purple-900/30 to-cyan-900/30 backdrop-blur-lg rounded-3xl p-12 border border-purple-500/30">
-            <h2 className="text-4xl font-bold mb-6">
+          <div className="bg-gradient-to-r from-purple-900/30 to-cyan-900/30 backdrop-blur-lg rounded-2xl md:rounded-3xl p-8 md:p-12 border border-purple-500/30">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">
               <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
                 Ready to Join the Revolution?
               </span>
             </h2>
-            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+            <p className="text-base md:text-xl text-gray-300 mb-6 md:mb-8 max-w-2xl mx-auto px-2">
               Be among the first to experience the future of spiritual technology. 
               Early adopters get exclusive access, founder benefits, and lifetime perks.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
               <button 
                 onClick={() => setShowEarlyAccess(true)}
-                className="bg-gradient-to-r from-purple-600 to-cyan-600 px-8 py-4 rounded-full text-lg font-semibold hover:scale-105 transition-transform shadow-lg shadow-purple-500/25"
+                className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-cyan-600 px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-semibold hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-purple-500/25 touch-manipulation min-h-[48px]"
               >
                 🚀 Join Waitlist - Free
               </button>
               <a 
                 href="mailto:hello@wizziverse.com"
-                className="border border-purple-500/50 px-8 py-4 rounded-full text-lg font-semibold hover:bg-purple-900/20 transition-colors"
+                className="w-full sm:w-auto border border-purple-500/50 px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-semibold hover:bg-purple-900/20 active:bg-purple-900/40 transition-colors touch-manipulation min-h-[48px] flex items-center justify-center"
               >
                 💼 Partnership Inquiry
               </a>
@@ -395,38 +455,38 @@ function App() {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 py-12 px-6 border-t border-purple-500/20">
+      <footer className="relative z-10 py-8 md:py-12 px-4 md:px-6 border-t border-purple-500/20">
         <div className="container mx-auto max-w-4xl text-center">
-          <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent mb-4">
+          <div className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent mb-3 md:mb-4">
             WIZZIVERSE
           </div>
-          <p className="text-gray-400 mb-6">
+          <p className="text-sm md:text-base text-gray-400 mb-4 md:mb-6">
             Transforming consciousness through sacred technology
           </p>
-          <div className="flex justify-center space-x-6">
-            <a href="#" className="text-gray-400 hover:text-purple-400 transition-colors">Privacy</a>
-            <a href="#" className="text-gray-400 hover:text-purple-400 transition-colors">Terms</a>
-            <a href="mailto:hello@wizziverse.com" className="text-gray-400 hover:text-purple-400 transition-colors">Contact</a>
+          <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+            <a href="#" className="text-gray-400 hover:text-purple-400 transition-colors text-sm md:text-base touch-manipulation">Privacy</a>
+            <a href="#" className="text-gray-400 hover:text-purple-400 transition-colors text-sm md:text-base touch-manipulation">Terms</a>
+            <a href="mailto:hello@wizziverse.com" className="text-gray-400 hover:text-purple-400 transition-colors text-sm md:text-base touch-manipulation">Contact</a>
           </div>
         </div>
       </footer>
 
-      {/* Early Access Modal */}
+      {/* Mobile-Optimized Early Access Modal */}
       {showEarlyAccess && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setShowEarlyAccess(false)}></div>
-          <div className="relative bg-gradient-to-br from-purple-900/95 to-cyan-900/95 backdrop-blur-2xl rounded-2xl p-8 max-w-lg w-full border border-purple-500/30 shadow-2xl">
+          <div className="relative bg-gradient-to-br from-purple-900/95 to-cyan-900/95 backdrop-blur-2xl rounded-2xl p-6 md:p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto border border-purple-500/30 shadow-2xl">
             <button 
               onClick={() => setShowEarlyAccess(false)}
-              className="absolute top-4 right-4 text-white/60 hover:text-white text-2xl"
+              className="absolute top-4 right-4 text-white/60 hover:text-white text-2xl w-8 h-8 flex items-center justify-center touch-manipulation"
             >
               ✕
             </button>
             
-            <div className="text-center mb-8">
-              <div className="text-6xl mb-4">🚀</div>
-              <h2 className="text-3xl font-bold text-white mb-4">Get Early Access</h2>
-              <p className="text-gray-300">
+            <div className="text-center mb-6 md:mb-8">
+              <div className="text-4xl md:text-6xl mb-3 md:mb-4">🚀</div>
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 md:mb-4">Get Early Access</h2>
+              <p className="text-sm md:text-base text-gray-300">
                 Join thousands of spiritual entrepreneurs and creators on the waitlist. 
                 Get exclusive updates and beta access when we launch.
               </p>
@@ -434,27 +494,27 @@ function App() {
 
             {submitted ? (
               <div className="text-center">
-                <div className="text-6xl mb-4 animate-bounce">✨</div>
-                <h3 className="text-2xl font-bold text-green-400 mb-2">Welcome to the Revolution!</h3>
-                <p className="text-gray-300">Check your email for exclusive early access details.</p>
+                <div className="text-4xl md:text-6xl mb-3 md:mb-4 animate-bounce">✨</div>
+                <h3 className="text-xl md:text-2xl font-bold text-green-400 mb-2">Welcome to the Revolution!</h3>
+                <p className="text-sm md:text-base text-gray-300">Check your email for exclusive early access details.</p>
               </div>
             ) : (
-              <form onSubmit={handleEarlyAccessSubmit} className="space-y-6">
+              <form onSubmit={handleEarlyAccessSubmit} className="space-y-4 md:space-y-6">
                 <div>
-                  <label className="block text-cyan-300 mb-2 font-medium">Email Address</label>
+                  <label className="block text-cyan-300 mb-2 font-medium text-sm md:text-base">Email Address</label>
                   <input 
                     type="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-black/40 border border-purple-500/30 rounded-lg px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
+                    className="w-full bg-black/40 border border-purple-500/30 rounded-lg px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none transition-colors text-sm md:text-base min-h-[48px]"
                     placeholder="your.email@example.com"
                     required
                   />
                 </div>
                 
-                <div className="bg-purple-900/20 rounded-lg p-4">
-                  <h4 className="font-semibold text-purple-300 mb-2">Early Access Benefits:</h4>
-                  <ul className="text-sm text-gray-300 space-y-1">
+                <div className="bg-purple-900/20 rounded-lg p-3 md:p-4">
+                  <h4 className="font-semibold text-purple-300 mb-2 text-sm md:text-base">Early Access Benefits:</h4>
+                  <ul className="text-xs md:text-sm text-gray-300 space-y-1">
                     <li>• Beta platform access</li>
                     <li>• Founding creator privileges</li>
                     <li>• Exclusive community access</li>
@@ -465,7 +525,7 @@ function App() {
                 <button 
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 py-4 rounded-lg font-semibold hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 py-3 md:py-4 rounded-lg font-semibold hover:scale-105 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base touch-manipulation min-h-[48px]"
                 >
                   {isSubmitting ? 'Joining Revolution...' : 'Join Waitlist - Free 🚀'}
                 </button>
