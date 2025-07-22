@@ -180,7 +180,6 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
   const [showDashboard, setShowDashboard] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const backgroundCanvasRef = useRef<HTMLCanvasElement>(null);
   const [activeArticle, setActiveArticle] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -1141,7 +1140,7 @@ function App() {
     }, 80);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [isTyping]);
 
   // Optimized canvas background renderer
   useEffect(() => {
@@ -1331,20 +1330,7 @@ function App() {
     setFormErrors({});
   };
 
-  const validateForm = (formData: {[key: string]: any}) => {
-    const errors: {[key: string]: string} = {};
-    
-    if (formData.title && formData.title.length < 3) {
-      errors.title = 'Title must be at least 3 characters';
-    }
-    
-    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = 'Please enter a valid email address';
-    }
-    
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
+
 
   const handleWizzicoinPurchase = (amount: number) => {
     setIsLoading(true);
@@ -1462,49 +1448,49 @@ function App() {
 
   const renderDashboard = () => (
     <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl overflow-y-auto">
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-white mb-2">Sacred Dashboard</h1>
-            <p className="text-gray-400">Welcome back, {user.name}</p>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
+          <div className="flex-1">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-1 sm:mb-2">Sacred Dashboard</h1>
+            <p className="text-gray-400 text-sm sm:text-base">Welcome back, {user.name}</p>
           </div>
           <button
             onClick={() => setShowDashboard(false)}
-            className="text-white/60 hover:text-white text-2xl bg-black/20 rounded-full w-12 h-12 flex items-center justify-center backdrop-blur-sm"
+            className="text-white/60 hover:text-white text-xl sm:text-2xl bg-black/20 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center backdrop-blur-sm shrink-0"
           >
             ✕
           </button>
         </div>
 
         {/* User Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {/* Coins */}
-          <div className="bg-gradient-to-br from-yellow-900/40 to-orange-900/40 backdrop-blur-lg rounded-xl p-6 border border-yellow-500/30">
+          <div className="bg-gradient-to-br from-yellow-900/40 to-orange-900/40 backdrop-blur-lg rounded-xl p-4 sm:p-6 border border-yellow-500/30">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="flex-1 min-w-0">
                 <p className="text-yellow-400 text-sm font-medium">WizziCoins</p>
-                <p className="text-3xl font-bold text-white">{wizzicoinCount.toLocaleString()}</p>
+                <p className="text-2xl sm:text-3xl font-bold text-white truncate">{wizzicoinCount.toLocaleString()}</p>
                 <p className="text-yellow-300 text-xs">≈ ${(wizzicoinCount * 0.12).toFixed(2)} USD</p>
               </div>
-              <div className="text-4xl">🪙</div>
+              <div className="text-3xl sm:text-4xl ml-2">🪙</div>
             </div>
             <button 
               onClick={() => openModal('wizzicoin')}
-              className="w-full mt-3 bg-yellow-600 hover:bg-yellow-700 py-2 rounded-lg text-sm font-medium transition-colors"
+              className="w-full mt-3 bg-yellow-600 hover:bg-yellow-700 py-2 rounded-lg text-sm font-medium transition-colors min-h-[40px]"
             >
               Buy More Coins
             </button>
           </div>
 
           {/* Level & XP */}
-          <div className="bg-gradient-to-br from-purple-900/40 to-cyan-900/40 backdrop-blur-lg rounded-xl p-6 border border-purple-500/30">
+          <div className="bg-gradient-to-br from-purple-900/40 to-cyan-900/40 backdrop-blur-lg rounded-xl p-4 sm:p-6 border border-purple-500/30">
             <div className="flex items-center justify-between mb-2">
-              <div>
+              <div className="flex-1 min-w-0">
                 <p className="text-purple-400 text-sm font-medium">Level {userLevel}</p>
-                <p className="text-2xl font-bold text-white">{userExperience.toLocaleString()} XP</p>
+                <p className="text-xl sm:text-2xl font-bold text-white truncate">{userExperience.toLocaleString()} XP</p>
               </div>
-              <div className="text-4xl">⭐</div>
+              <div className="text-3xl sm:text-4xl ml-2">⭐</div>
             </div>
             <div className="w-full bg-black/30 rounded-full h-2 mb-2">
               <div 
@@ -1518,19 +1504,19 @@ function App() {
           </div>
 
           {/* Achievements */}
-          <div className="bg-gradient-to-br from-cyan-900/40 to-purple-900/40 backdrop-blur-lg rounded-xl p-6 border border-cyan-500/30">
+          <div className="bg-gradient-to-br from-cyan-900/40 to-purple-900/40 backdrop-blur-lg rounded-xl p-4 sm:p-6 border border-cyan-500/30">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="flex-1 min-w-0">
                 <p className="text-cyan-400 text-sm font-medium">Achievements</p>
-                <p className="text-3xl font-bold text-white">{achievements.filter(a => a.unlocked).length}/{achievements.length}</p>
+                <p className="text-2xl sm:text-3xl font-bold text-white">{achievements.filter(a => a.unlocked).length}/{achievements.length}</p>
               </div>
-              <div className="text-4xl">🏆</div>
+              <div className="text-3xl sm:text-4xl ml-2">🏆</div>
             </div>
             <div className="flex space-x-1 mt-3">
               {achievements.slice(0, 3).map(achievement => (
                 <div
                   key={achievement.id}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
+                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm ${
                     achievement.unlocked ? 'bg-gradient-to-r from-yellow-500 to-orange-500' : 'bg-gray-600'
                   }`}
                 >
@@ -1541,15 +1527,15 @@ function App() {
           </div>
 
           {/* Active Tasks */}
-          <div className="bg-gradient-to-br from-green-900/40 to-teal-900/40 backdrop-blur-lg rounded-xl p-6 border border-green-500/30">
+          <div className="bg-gradient-to-br from-green-900/40 to-teal-900/40 backdrop-blur-lg rounded-xl p-4 sm:p-6 border border-green-500/30">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="flex-1 min-w-0">
                 <p className="text-green-400 text-sm font-medium">Active Tasks</p>
-                <p className="text-3xl font-bold text-white">
+                <p className="text-2xl sm:text-3xl font-bold text-white">
                   {availableTasks.filter(t => !completedTasks.includes(t.id)).length}
                 </p>
               </div>
-              <div className="text-4xl">📋</div>
+              <div className="text-3xl sm:text-4xl ml-2">📋</div>
             </div>
             <p className="text-green-300 text-xs mt-2">
               Complete tasks to earn coins & XP
@@ -1558,22 +1544,22 @@ function App() {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           
           {/* Tasks Section */}
-          <div className="lg:col-span-2">
-            <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-purple-500/30 mb-6">
-              <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-                <span className="mr-3">📋</span>
-                Sacred Tasks & Challenges
+          <div className="lg:col-span-2 order-2 lg:order-1">
+            <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-4 sm:p-6 border border-purple-500/30 mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center">
+                <span className="mr-2 sm:mr-3 text-lg sm:text-2xl">📋</span>
+                <span className="truncate">Sacred Tasks & Challenges</span>
               </h2>
               
               {/* Task Categories */}
-              <div className="flex space-x-2 mb-6">
+              <div className="flex flex-wrap gap-2 mb-4 sm:mb-6">
                 {['Daily', 'Weekly', 'Achievements'].map(category => (
                   <button
                     key={category}
-                    className="px-4 py-2 rounded-full text-sm font-medium bg-purple-900/40 text-purple-300 border border-purple-500/30 hover:bg-purple-800/40 transition-colors"
+                    className="px-3 sm:px-4 py-2 rounded-full text-sm font-medium bg-purple-900/40 text-purple-300 border border-purple-500/30 hover:bg-purple-800/40 transition-colors min-h-[36px]"
                   >
                     {category}
                   </button>
@@ -1581,91 +1567,91 @@ function App() {
               </div>
 
               {/* Tasks List */}
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {availableTasks.map(task => {
                   const isCompleted = completedTasks.includes(task.id);
                   return (
                     <div
                       key={task.id}
-                      className={`bg-gradient-to-r from-black/60 to-purple-900/20 rounded-xl p-4 border transition-all ${
+                      className={`bg-gradient-to-r from-black/60 to-purple-900/20 rounded-xl p-3 sm:p-4 border transition-all ${
                         isCompleted ? 'border-green-500/50 opacity-75' : 'border-purple-500/20 hover:border-cyan-500/30'
                       }`}
                     >
-                      <div className="flex items-center space-x-4">
-                        <div className="text-3xl">{task.icon}</div>
+                      <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
+                        <div className="text-2xl sm:text-3xl shrink-0 self-center sm:self-start">{task.icon}</div>
                         
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <h3 className={`font-bold ${isCompleted ? 'text-green-400 line-through' : 'text-white'}`}>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-2">
+                            <h3 className={`font-bold text-sm sm:text-base ${isCompleted ? 'text-green-400 line-through' : 'text-white'}`}>
                               {task.title}
                             </h3>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getDifficultyColor(task.difficulty)}`}>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium border shrink-0 ${getDifficultyColor(task.difficulty)}`}>
                               {task.difficulty}
                             </span>
                             {task.type === 'daily' && (
-                              <span className="bg-blue-900/40 text-blue-300 px-2 py-1 rounded-full text-xs">
+                              <span className="bg-blue-900/40 text-blue-300 px-2 py-1 rounded-full text-xs shrink-0">
                                 📅 Daily
                               </span>
                             )}
                             {task.type === 'weekly' && (
-                              <span className="bg-indigo-900/40 text-indigo-300 px-2 py-1 rounded-full text-xs">
+                              <span className="bg-indigo-900/40 text-indigo-300 px-2 py-1 rounded-full text-xs shrink-0">
                                 📆 Weekly
                               </span>
                             )}
                           </div>
                           
-                          <p className="text-gray-300 text-sm mb-2">{task.description}</p>
+                          <p className="text-gray-300 text-xs sm:text-sm mb-3">{task.description}</p>
                           
                           {/* Progress Bar */}
-                          <div className="flex items-center space-x-3 mb-2">
+                          <div className="flex items-center gap-3 mb-3">
                             <div className="flex-1 bg-black/40 rounded-full h-2">
                               <div
                                 className="bg-gradient-to-r from-purple-500 to-cyan-500 h-2 rounded-full transition-all duration-500"
                                 style={{ width: `${(task.progress / task.maxProgress) * 100}%` }}
                               ></div>
                             </div>
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-gray-400 shrink-0">
                               {task.progress}/{task.maxProgress}
                             </span>
                           </div>
 
                           {/* Rewards */}
-                          <div className="flex items-center space-x-4 text-xs">
-                            <div className="flex items-center space-x-1">
+                          <div className="flex flex-wrap items-center gap-3 text-xs mb-2">
+                            <div className="flex items-center gap-1">
                               <span className="text-yellow-400">🪙</span>
                               <span className="text-gray-300">{task.reward.coins} coins</span>
                             </div>
-                            <div className="flex items-center space-x-1">
+                            <div className="flex items-center gap-1">
                               <span className="text-purple-400">⭐</span>
                               <span className="text-gray-300">{task.reward.experience} XP</span>
                             </div>
                             {task.reward.achievement && (
-                              <div className="flex items-center space-x-1">
+                              <div className="flex items-center gap-1">
                                 <span className="text-cyan-400">🏆</span>
-                                <span className="text-gray-300">{task.reward.achievement}</span>
+                                <span className="text-gray-300 truncate">{task.reward.achievement}</span>
                               </div>
                             )}
                           </div>
 
                           {task.expiresAt && (
-                            <p className="text-red-400 text-xs mt-1">⏰ Expires: {task.expiresAt}</p>
+                            <p className="text-red-400 text-xs">⏰ Expires: {task.expiresAt}</p>
                           )}
                         </div>
 
-                        <div>
+                        <div className="shrink-0 self-center">
                           {isCompleted ? (
-                            <div className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                            <div className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium text-center min-h-[36px] flex items-center justify-center">
                               ✅ Completed
                             </div>
                           ) : task.progress >= task.maxProgress ? (
                             <button
                               onClick={() => completeTask(task)}
-                              className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all animate-pulse"
+                              className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all animate-pulse min-h-[36px]"
                             >
                               🎉 Claim Reward
                             </button>
                           ) : (
-                            <button className="bg-gray-600 text-gray-300 px-4 py-2 rounded-lg text-sm font-medium cursor-not-allowed">
+                            <button className="bg-gray-600 text-gray-300 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium cursor-not-allowed min-h-[36px]">
                               In Progress
                             </button>
                           )}
@@ -1679,27 +1665,27 @@ function App() {
           </div>
 
           {/* Right Sidebar */}
-          <div>
+          <div className="order-1 lg:order-2">
             {/* Recent Activity */}
-            <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-purple-500/30 mb-6">
-              <h3 className="text-xl font-bold text-white mb-4 flex items-center">
-                <span className="mr-2">📊</span>
-                Recent Activity
+            <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-4 sm:p-6 border border-purple-500/30 mb-4 sm:mb-6">
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center">
+                <span className="mr-2 text-lg sm:text-xl">📊</span>
+                <span className="truncate">Recent Activity</span>
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {[
                   { action: "Watched Sacred Geometry video", reward: "+25 🪙 +50 XP", time: "2 hours ago", icon: "🎬" },
                   { action: "Joined Community WhatsApp", reward: "+30 🪙 +75 XP", time: "5 hours ago", icon: "💬" },
                   { action: "Completed Profile Setup (2/3)", reward: "Progress", time: "1 day ago", icon: "👤" },
                   { action: "Unlocked Beta Tester achievement", reward: "🏆 Achievement", time: "3 days ago", icon: "🧪" }
                 ].map((activity, index) => (
-                  <div key={index} className="flex items-center space-x-3 p-3 bg-purple-900/20 rounded-lg">
-                    <span className="text-2xl">{activity.icon}</span>
-                    <div className="flex-1">
-                      <p className="text-white text-sm">{activity.action}</p>
+                  <div key={index} className="flex items-center gap-3 p-2 sm:p-3 bg-purple-900/20 rounded-lg">
+                    <span className="text-lg sm:text-2xl shrink-0">{activity.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-xs sm:text-sm truncate">{activity.action}</p>
                       <p className="text-gray-400 text-xs">{activity.time}</p>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right shrink-0">
                       <p className="text-green-400 text-xs">{activity.reward}</p>
                     </div>
                   </div>
@@ -1708,18 +1694,18 @@ function App() {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-cyan-500/30">
-              <h3 className="text-xl font-bold text-white mb-4 flex items-center">
-                <span className="mr-2">⚡</span>
-                Quick Actions
+            <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-4 sm:p-6 border border-cyan-500/30">
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center">
+                <span className="mr-2 text-lg sm:text-xl">⚡</span>
+                <span className="truncate">Quick Actions</span>
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 <button 
                   onClick={() => {
                     setShowDashboard(false);
                     setTimeout(() => openModal('wizzicoin'), 100);
                   }}
-                  className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 py-3 rounded-lg font-semibold transition-all text-sm"
+                  className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 py-3 rounded-lg font-semibold transition-all text-sm min-h-[44px]"
                 >
                   🪙 Buy WizziCoins
                 </button>
@@ -1728,7 +1714,7 @@ function App() {
                     setShowDashboard(false);
                     setTimeout(() => openModal('creation'), 100);
                   }}
-                  className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 py-3 rounded-lg font-semibold transition-all text-sm"
+                  className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 py-3 rounded-lg font-semibold transition-all text-sm min-h-[44px]"
                 >
                   🎨 Submit Creation
                 </button>
@@ -1737,7 +1723,7 @@ function App() {
                     setShowDashboard(false);
                     setTimeout(() => openModal('healers'), 100);
                   }}
-                  className="w-full bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-700 hover:to-purple-700 py-3 rounded-lg font-semibold transition-all text-sm"
+                  className="w-full bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-700 hover:to-purple-700 py-3 rounded-lg font-semibold transition-all text-sm min-h-[44px]"
                 >
                   🔮 Book Healing
                 </button>
@@ -1747,34 +1733,34 @@ function App() {
         </div>
 
         {/* Achievements Section */}
-        <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-yellow-500/30 mt-8">
-          <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-            <span className="mr-3">🏆</span>
-            Achievement Gallery
+        <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-4 sm:p-6 border border-yellow-500/30 mt-6 sm:mt-8">
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center">
+            <span className="mr-2 sm:mr-3 text-lg sm:text-2xl">🏆</span>
+            <span className="truncate">Achievement Gallery</span>
           </h2>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4">
             {achievements.map(achievement => (
               <div
                 key={achievement.id}
-                className={`text-center p-4 rounded-xl border transition-all ${
+                className={`text-center p-3 sm:p-4 rounded-xl border transition-all ${
                   achievement.unlocked
                     ? 'bg-gradient-to-br from-yellow-900/40 to-orange-900/40 border-yellow-500/30'
                     : 'bg-black/40 border-gray-500/30'
                 }`}
               >
-                <div className={`text-4xl mb-2 ${achievement.unlocked ? '' : 'grayscale opacity-50'}`}>
+                <div className={`text-2xl sm:text-3xl lg:text-4xl mb-2 ${achievement.unlocked ? '' : 'grayscale opacity-50'}`}>
                   {achievement.icon}
                 </div>
-                <h4 className={`font-bold text-sm mb-1 ${achievement.unlocked ? 'text-yellow-300' : 'text-gray-400'}`}>
+                <h4 className={`font-bold text-xs sm:text-sm mb-1 ${achievement.unlocked ? 'text-yellow-300' : 'text-gray-400'} truncate`}>
                   {achievement.title}
                 </h4>
-                <p className="text-xs text-gray-400 mb-2">{achievement.description}</p>
+                <p className="text-xs text-gray-400 mb-2 overflow-hidden h-12 leading-tight">{achievement.description}</p>
                 
                 {!achievement.unlocked && (
                   <div className="w-full bg-black/40 rounded-full h-1 mb-2">
                     <div
-                      className="bg-gradient-to-r from-yellow-500 to-orange-500 h-1 rounded-full"
+                      className="bg-gradient-to-r from-yellow-500 to-orange-500 h-1 rounded-full transition-all"
                       style={{ width: `${(achievement.progress / achievement.maxProgress) * 100}%` }}
                     ></div>
                   </div>
@@ -2300,7 +2286,7 @@ function App() {
     }
     
     return () => clearInterval(interval);
-  }, [isGameActive, activeGame, gameScore]);
+  }, [isGameActive, activeGame, gameScore, endGame]);
 
   // Keyboard controls for Crystal Collector
   useEffect(() => {
@@ -2339,7 +2325,7 @@ function App() {
       window.addEventListener('keydown', handleKeyPress);
       return () => window.removeEventListener('keydown', handleKeyPress);
     }
-  }, [activeGame, isGameActive]);
+  }, [activeGame, isGameActive, movePlayer]);
 
   const renderGameModal = () => {
     if (!activeGame) return null;
